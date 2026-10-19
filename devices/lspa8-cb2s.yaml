@@ -1,0 +1,129 @@
+# =============================================================================
+# devices/lspa8-cb2s.yaml — prise Tuya LSPA8 (carte A8TYV1.3, module CB2S / BK7231N)
+# -----------------------------------------------------------------------------
+# À utiliser AVEC common/base.yaml.
+#
+# Brochage (cf. https://devices.esphome.io/devices/tuya-smart-plug-16a-il/) :
+#   P26 : relais + LED rouge (même broche : la rouge suit toujours le relais)
+#   P8  : LED bleue (indépendante) -> LED de statut
+#   P10 : bouton (aussi RX1 : peut gêner le flashage série)
+#   P6 / P7 / P24 : BL0937 CF1 / CF / SEL
+#
+# Calibration : chaque BL0937 a ses propres écarts. Les valeurs ci-dessous
+# sont les valeurs PAR DÉFAUT ; les surcharger dans le fichier local de
+# chaque prise (voir README, section « Calibration »).
+# =============================================================================
+
+substitutions:
+  # --- Calibration (à surcharger par prise) ---
+  voltage_divider: "800"
+  current_resistor: "0.001 ohm"
+  current_multiply: "0.5"
+  # --- Comportement ---
+  current_limit: "16"                       # A — limite de la LSPA8, le relais s'ouvre au-delà
+  relay_restore_mode: RESTORE_DEFAULT_ON    # état restauré au démarrage
+  power_on_state_default: Toujours allumé   # valeur initiale du sélecteur « État au démarrage »
+  power_socket_icon: mdi:power-socket-ch
+
+esphome:
+  project:
+    name: lheriss.lspa8-cb2s
+    version: "1.0.0"
+  # Applique le choix « État au démarrage » une fois le relais et le sélecteur restaurés
+  on_boot:
+    - priority: 600
+      then:
+        - lambda: |-
+            auto idx = id(power_on_state).active_index();
+            if (!idx.has_value()) return;
+            if (*idx == 0) id(relay).turn_on();        // Toujours allumé
+            else if (*idx == 1) id(relay).turn_off();  // Toujours éteint
+            // 2 = Comme avant la coupure : état restauré par restore_mode
+
+bk72xx:
+  board: cb2s
+
+# LED bleue : éteinte en temps normal, clignote en cas de problème
+# (Wi-Fi perdu, Home Assistant déconnecté, erreur d'un composant)
+status_led:
+  pin:
+    number: P8
+    inverted: true
+
+select:
+  - platform: template
+    name: État au démarrage
+    id: power_on_state
+    icon: mdi:electric-switch
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    options:
+      - Toujours allumé
+      - Toujours éteint
+      - Comme avant la coupure
+    initial_option: ${power_on_state_default}
+
+binary_sensor:
+  - platform: gpio
+    id: bouton
+    pin:
+      number: P10
+      inverted: true
+      mode: INPUT_PULLUP
+    on_press:
+      then:
+        - switch.toggle: relay
+
+switch:
+  - platform: gpio
+    name: Relais
+    id: relay
+    pin: P26
+    icon: ${power_socket_icon}
+    # Restaure l'état d'avant la coupure ; « État au démarrage » peut ensuite l'imposer
+    restore_mode: ${relay_restore_mode}
+
+sensor:
+  - platform: hlw8012
+    model: BL0937
+    cf_pin:
+      number: P7
+      inverted: true
+    cf1_pin:
+      number: P6
+      inverted: true
+    sel_pin:
+      number: P24
+      inverted: true
+    current_resistor: ${current_resistor}
+    voltage_divider: ${voltage_divider}
+    update_interval: 5s
+    change_mode_every: 1
+    current:
+      name: Courant
+      icon: mdi:current-ac
+      filters:
+        - multiply: ${current_multiply}
+      # Sécurité : coupure du relais en cas de surintensité
+      on_value_range:
+        - above: ${current_limit}
+          then:
+            - logger.log:
+                level: WARN
+                format: "Surintensité (%.2f A) : coupure du relais"
+                args: ['x']
+            - switch.turn_off: relay
+    voltage:
+      name: Tension
+      icon: mdi:sine-wave
+    power:
+      name: Puissance
+      icon: mdi:flash
+    energy:
+      name: Énergie           # total_increasing, utilisable dans le tableau Énergie
+      icon: mdi:lightning-bolt
+      unit_of_measurement: kWh
+      accuracy_decimals: 3
+      filters:
+        - multiply: 0.001     # Wh -> kWh
