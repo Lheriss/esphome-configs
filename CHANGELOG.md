@@ -1,5 +1,9 @@
 # Changelog
 
+## lspa8-v1.0.1 — 2026-10-19
+
+- `devices/lspa8-cb2s.yaml`: default over-current cut-off lowered from 16 A to **10 A**, the rating of Swiss T12/T13 plugs and sockets (SN 441011), regardless of the 16 A advertised for the plug. Override `current_limit` locally if needed.
+
 ## lspa8-v1.0.0 — 2026-10-19
 
 First release.
