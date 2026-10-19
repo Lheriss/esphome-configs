@@ -1,0 +1,38 @@
+# Exemple de fichier local pour une prise LSPA8, à copier dans /config/esphome/
+# (ESPHome Builder de Home Assistant) et à adapter.
+
+substitutions:
+  device_name: prise-exemple          # nom réseau (mDNS), en minuscules avec tirets
+  friendly_name: PriseExemple         # préfixe des entités dans Home Assistant
+  # Calibration propre à CETTE prise (voir README, section « Calibration »)
+  voltage_divider: "800"
+  current_resistor: "0.001 ohm"
+  current_multiply: "0.5"
+  # Facultatif : surcharger les autres valeurs par défaut du package
+  # current_limit: "16"
+  # relay_restore_mode: RESTORE_DEFAULT_ON
+
+packages:
+  lspa8:
+    url: https://github.com/Lheriss/esphome-configs
+    ref: lspa8-v1.0.0                 # version figée : changer ici pour mettre à jour
+    files:
+      - common/base.yaml
+      - devices/lspa8-cb2s.yaml
+    refresh: 1d
+
+# Secrets : toujours dans le fichier local (interdits dans un package distant)
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  # IP fixe facultative :
+  # manual_ip:
+  #   static_ip: 172.28.8.xxx
+  #   gateway: 172.28.8.1
+  #   subnet: 255.255.255.0
+  #   dns1: 172.28.8.2
+  #   dns2: 1.1.1.1
