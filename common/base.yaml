@@ -1,0 +1,111 @@
+# =============================================================================
+# common/base.yaml — socle commun à tous les nœuds ESPHome
+# -----------------------------------------------------------------------------
+# Ne contient AUCUN secret (interdit dans un package distant).
+# À compléter dans le fichier local de chaque appareil :
+#
+#   api:
+#     encryption:
+#       key: !secret api_encryption_key
+#   wifi:
+#     ssid: !secret wifi_ssid
+#     password: !secret wifi_password
+#
+# Substitutions attendues : device_name, friendly_name
+# =============================================================================
+
+esphome:
+  name: ${device_name}
+  friendly_name: ${friendly_name}
+  name_add_mac_suffix: false
+
+# Niveau maximal compilé : DEBUG ; niveau actif au démarrage : INFO
+# (modifiable depuis HA avec le sélecteur « Niveau de journal »)
+logger:
+  level: DEBUG
+  initial_level: INFO
+
+# OTA chiffré avec la clé de l'API (ESPHome >= 2026.9)
+ota:
+  - platform: esphome
+    encryption:
+
+# Point d'accès de secours + portail captif si le Wi-Fi est injoignable
+# (fusionné avec le bloc wifi: local qui porte ssid / password)
+wifi:
+  ap:
+
+captive_portal:
+
+# Page web locale sur http://<device_name>.local
+# La page n'affiche que les icônes déclarées explicitement (pas celles
+# déduites de device_class par HA) : d'où les icon: sur toutes les entités.
+web_server:
+  port: 80
+  version: 3
+
+# Requis pour la raison du dernier redémarrage
+debug:
+  update_interval: 60s
+
+select:
+  - platform: logger
+    name: Niveau de journal
+    icon: mdi:bug-outline
+    entity_category: config
+
+binary_sensor:
+  - platform: status
+    name: Statut
+    icon: mdi:check-network-outline
+    entity_category: diagnostic
+
+sensor:
+  - platform: wifi_signal
+    name: Signal Wi-Fi
+    id: wifi_signal_db
+    icon: mdi:wifi
+    update_interval: 60s
+    entity_category: diagnostic
+
+  - platform: copy
+    source_id: wifi_signal_db
+    name: Signal Wi-Fi %
+    icon: mdi:wifi-strength-3
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: "%"
+    device_class: ""
+    entity_category: diagnostic
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: Adresse IP
+      icon: mdi:ip-network
+      entity_category: diagnostic
+
+  - platform: uptime
+    name: Temps de fonctionnement
+    icon: mdi:timer-outline
+    entity_category: diagnostic
+    update_interval: 60s
+    format:
+      separator: " "
+
+  - platform: debug
+    reset_reason:
+      name: Raison du redémarrage
+      icon: mdi:restart-alert
+      entity_category: diagnostic
+
+button:
+  - platform: restart
+    name: Redémarrer
+    icon: mdi:restart
+    entity_category: config
+
+  - platform: safe_mode
+    name: Mode sans échec
+    icon: mdi:restart-off
+    entity_category: config
