@@ -26,7 +26,7 @@ substitutions:
 packages:
   lspa8:
     url: https://github.com/Lheriss/esphome-configs
-    ref: lspa8-v1.0.0
+    ref: lspa8-v1.0.1
     files: [common/base.yaml, devices/lspa8-cb2s.yaml]
     refresh: 1d
 
