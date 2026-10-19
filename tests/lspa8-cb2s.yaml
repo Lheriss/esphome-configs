@@ -1,0 +1,16 @@
+# Configuration de test (CI) : packages locaux + secrets factices (tests/secrets.yaml)
+substitutions:
+  device_name: test-lspa8
+  friendly_name: TestLSPA8
+
+packages:
+  base: !include ../common/base.yaml
+  lspa8: !include ../devices/lspa8-cb2s.yaml
+
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
