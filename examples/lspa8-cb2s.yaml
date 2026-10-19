@@ -9,13 +9,13 @@ substitutions:
   current_resistor: "0.001 ohm"
   current_multiply: "0.5"
   # Facultatif : surcharger les autres valeurs par défaut du package
-  # current_limit: "16"
+  # current_limit: "10"
   # relay_restore_mode: RESTORE_DEFAULT_ON
 
 packages:
   lspa8:
     url: https://github.com/Lheriss/esphome-configs
-    ref: lspa8-v1.0.0                 # version figée : changer ici pour mettre à jour
+    ref: lspa8-v1.0.1                 # version figée : changer ici pour mettre à jour
     files:
       - common/base.yaml
       - devices/lspa8-cb2s.yaml
