@@ -1,0 +1,24 @@
+name: Validate ESPHome configs
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - tests/lspa8-cb2s.yaml
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install ESPHome
+        run: pip install "esphome==2026.9.1"
+      - name: Validate ${{ matrix.config }}
+        run: esphome config ${{ matrix.config }}
