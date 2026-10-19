@@ -20,7 +20,9 @@ substitutions:
   current_resistor: "0.001 ohm"
   current_multiply: "0.5"
   # --- Comportement ---
-  current_limit: "16"                       # A — limite de la LSPA8, le relais s'ouvre au-delà
+  # A — le relais s'ouvre au-delà. 10 A = limite des fiches/prises suisses T12/T13
+  # (SN 441011), même si le vendeur annonce 16 A pour la LSPA8.
+  current_limit: "10"
   relay_restore_mode: RESTORE_DEFAULT_ON    # état restauré au démarrage
   power_on_state_default: Toujours allumé   # valeur initiale du sélecteur « État au démarrage »
   power_socket_icon: mdi:power-socket-ch
@@ -28,7 +30,7 @@ substitutions:
 esphome:
   project:
     name: lheriss.lspa8-cb2s
-    version: "1.0.0"
+    version: "1.0.1"
   # Applique le choix « État au démarrage » une fois le relais et le sélecteur restaurés
   on_boot:
     - priority: 600
