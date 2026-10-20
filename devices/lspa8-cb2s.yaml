@@ -30,7 +30,7 @@ substitutions:
 esphome:
   project:
     name: lheriss.lspa8-cb2s
-    version: "1.0.1"
+    version: "1.1.0"
   # Applique le choix « État au démarrage » une fois le relais et le sélecteur restaurés
   on_boot:
     - priority: 600
