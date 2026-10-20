@@ -15,10 +15,11 @@ substitutions:
 packages:
   lspa8:
     url: https://github.com/Lheriss/esphome-configs
-    ref: lspa8-v1.0.1                 # version figée : changer ici pour mettre à jour
+    ref: lspa8-v1.1.0                 # version figée : changer ici pour mettre à jour
     files:
       - common/base.yaml
       - devices/lspa8-cb2s.yaml
+      # - common/ble-proxy-bk72xx.yaml  # facultatif : proxy Bluetooth passif
     refresh: 1d
 
 # Secrets : toujours dans le fichier local (interdits dans un package distant)
