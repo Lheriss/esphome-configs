@@ -1,0 +1,17 @@
+# Configuration de test (CI) : LSPA8 + option proxy Bluetooth passif
+substitutions:
+  device_name: test-lspa8-ble
+  friendly_name: TestLSPA8BLE
+
+packages:
+  base: !include ../common/base.yaml
+  lspa8: !include ../devices/lspa8-cb2s.yaml
+  ble: !include ../common/ble-proxy-bk72xx.yaml
+
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
