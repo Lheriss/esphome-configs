@@ -13,6 +13,7 @@ jobs:
       matrix:
         config:
           - tests/lspa8-cb2s.yaml
+          - tests/lspa8-cb2s-ble.yaml
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
