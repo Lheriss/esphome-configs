@@ -7,6 +7,7 @@ Shared [ESPHome](https://esphome.io) packages for my devices. Each device keeps 
 | Path | Content |
 |---|---|
 | `common/base.yaml` | Shared by every node: logger (level selectable from Home Assistant), encrypted OTA, fallback AP + captive portal, web server v3, diagnostics (status, Wi-Fi dBm/%, IP, uptime, reset reason), restart / safe-mode buttons |
+| `common/ble-proxy-bk72xx.yaml` | *Optional.* Passive Bluetooth proxy for BK72xx chips with BLE 5.x (BK7231N / CB2S…), ESPHome ≥ 2026.8: forwards advertisements (BTHome, ATC thermometers, beacons), no GATT connections |
 | `devices/lspa8-cb2s.yaml` | Tuya LSPA8 smart plug (board A8TYV1.3, CB2S / BK7231N): relay, button, status LED, BL0937 power metering, over-current cut-off, power-on state selector |
 | `examples/` | Local device files to copy into ESPHome Builder |
 | `tests/` | CI configs with dummy secrets |
@@ -26,7 +27,7 @@ substitutions:
 packages:
   lspa8:
     url: https://github.com/Lheriss/esphome-configs
-    ref: lspa8-v1.0.1
+    ref: lspa8-v1.1.0
     files: [common/base.yaml, devices/lspa8-cb2s.yaml]
     refresh: 1d
 
