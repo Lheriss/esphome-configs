@@ -1,0 +1,43 @@
+# =============================================================================
+# common/ble-proxy-bk72xx.yaml — proxy Bluetooth PASSIF pour puces Beken (BK72xx)
+# -----------------------------------------------------------------------------
+# OPTIONNEL : à ajouter à la liste files: des appareils concernés.
+# Requiert ESPHome >= 2026.8 et une puce à pile BLE 5.x (BK7231N : CB2S, CB3S…).
+# Non supporté sur BK7231T / BK7251 / BK7231Q.
+#
+# Limites de la plateforme :
+#  - annonces seulement : pas de connexion GATT (active: true refusé), donc
+#    inutile pour Nuki, Tesla, Sonicare… ; OK pour BTHome, ATC, balises ;
+#  - Wi-Fi et BLE partagent la même radio et le même cœur CPU ;
+#  - power_save_mode du Wi-Fi forcé à none tant que le BLE est actif.
+#
+# Comme sur les proxys ESP32 : le scan ne tourne que lorsque Home Assistant
+# est connecté (aucune annonce ne serait relayée sinon).
+# =============================================================================
+
+substitutions:
+  ble_scan_interval: 320ms      # fenêtre/intervalle = ~9 % de temps radio pour le BLE
+  ble_scan_window: 30ms         # (BK72xx : un seul cœur pour Wi-Fi + BLE)
+
+bk72xx_ble_tracker:
+  id: ble_tracker
+  scan_parameters:
+    interval: ${ble_scan_interval}
+    window: ${ble_scan_window}
+    active: false               # passif : suffisant pour BTHome / ATC / balises
+    continuous: false           # démarré / arrêté par l'API ci-dessous
+
+bluetooth_proxy:
+
+api:
+  on_client_connected:
+    - bk72xx_ble_tracker.start_scan:
+        continuous: true
+  on_client_disconnected:
+    - if:
+        condition:
+          not:
+            api.connected:
+              state_subscription_only: true
+        then:
+          - bk72xx_ble_tracker.stop_scan:
