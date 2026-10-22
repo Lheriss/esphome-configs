@@ -56,12 +56,17 @@ See [CHANGELOG.md](CHANGELOG.md).
 Each BL0937 has its own offsets; calibrate every plug against a trusted reference, ideally the utility meter (here a gPlugM reading the Landis+Gyr E450 per phase), with a purely resistive load (kettle):
 
 1. **Voltage** — compare no-load voltage on the plug's phase: `voltage_divider_new = voltage_divider × V_ref / V_plug`.
-2. **Current** — compare the current *increase* on that phase when the load switches on with the plug reading. Power scales as `voltage_divider / current_resistor`, current as `current_multiply / current_resistor`:
-   - fix power first: `current_resistor_new = current_resistor × (P_plug / P_ref) × (voltage_divider_new / voltage_divider)` (with `P_ref = V_plug_ref × I_ref`, PF = 1, `V_plug_ref` being the corrected voltage at the plug under load);
-   - then current: `current_multiply_new = current_multiply × (I_ref / I_plug) × (current_resistor_new / current_resistor)`.
-3. Repeat 2–3 on/off cycles of ~30 s and discard any cycle where another appliance switched on.
+2. **Reference load** — use the *active power* increase on that phase when the load switches on, `ΔP_meter`, **not the current increase**. Active power adds up; current magnitudes do not: with a reactive background on the phase (PF ≈ 0.6, 1–1.5 A here), `ΔI` underestimated the kettle current by about 5 %.
+   - kettle current: `I_ref = ΔP_meter / V_meter_load` (meter voltage under load, PF = 1);
+   - wiring losses between meter and plug: `P_loss = (V_meter_load − V_plug_load) × I_ref`, with `V_plug_load` already corrected by step 1;
+   - power at the plug: `P_ref = ΔP_meter − P_loss`.
+3. **Power, then current** — power scales as `voltage_divider / current_resistor`, current as `current_multiply / current_resistor`:
+   - `current_resistor_new = current_resistor × (P_plug / P_ref) × (voltage_divider_new / voltage_divider)`;
+   - `current_multiply_new = current_multiply × (I_ref / I_plug) × (current_resistor_new / current_resistor)`.
+   - Check: after correction, `P ≈ V × I` at the plug (PF ≈ 1.00).
+4. Run 2 or 3 on/off cycles of ~30 s, average the steady samples (skip the first one after switching), and discard any cycle where another appliance switched on.
 
-Note: compare voltage at no load only. Under load, wiring between the meter and the plug drops several volts.
+Notes: compare voltage at no load only — under load, wiring between the meter and the plug drops several volts. Set the plug's log level to DEBUG from Home Assistant during the test (no restart needed) and keep its log: plug voltage and current are usually not in the recorder.
 
 ## Hardware notes — LSPA8 (A8TYV1.3 / CB2S)
 
